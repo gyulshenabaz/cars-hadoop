@@ -25,7 +25,7 @@ import org.apache.hadoop.mapred.RunningJob;
 
 public class App extends JFrame {
 
-    private JComboBox < String > resultComboBox;
+    private JComboBox<String> resultComboBox;
     private JTextField brandTextField, horsePowerFromTextField, horsePowerToTextField, mpgTextField;
     private JButton searchButton;
 
@@ -43,12 +43,9 @@ public class App extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // GUI elements
-        resultComboBox = new JComboBox < > (new String[] {
-            "Average Consumption",
-            "Car List"
-        });
+        resultComboBox = new JComboBox<>(new String[]{"Average Consumption", "Car List"});
         resultComboBox.setSelectedItem("Average Consumption");
-
+        
         brandTextField = new JTextFieldWithPlaceholder("Search by brand");
 
         horsePowerFromTextField = new JTextFieldWithPlaceholder("Horsepower from");
@@ -58,7 +55,7 @@ public class App extends JFrame {
         mpgTextField = new JTextFieldWithPlaceholder("Minimum MPG");
 
         searchButton = new JButton("Search");
-
+        
         handleComboBoxChange();
 
         // Add an ActionListener to the ComboBox
@@ -72,7 +69,7 @@ public class App extends JFrame {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                startHadoop();
+            	startHadoop();
             }
         });
 
@@ -105,21 +102,21 @@ public class App extends JFrame {
         horsePowerToTextField.setEnabled(!isAverageConsumption);
         mpgTextField.setEnabled(!isAverageConsumption);
     }
-
+    
     private String filterType() {
-        String selectedResult = (String) resultComboBox.getSelectedItem();
+    	String selectedResult = (String) resultComboBox.getSelectedItem();
         boolean isAverageConsumption = "Average Consumption".equals(selectedResult);
-
+        
         if (isAverageConsumption) {
-            return "1";
+        	return "1";
         }
-
+        
         return "0";
 
     }
-
+    
     protected void startHadoop() {
-        Configuration conf = new Configuration();
+    	Configuration conf = new Configuration();
         conf.set("resultType", filterType()); // Set the result type ("average consumption" or "car list")
         conf.set("brand", brandTextField.getText()); // Set the brand filter
         conf.set("horsepowerFrom", horsePowerFromTextField.getText()); // Set the minimum horsepower filter
@@ -127,35 +124,35 @@ public class App extends JFrame {
         conf.set("mpg", mpgTextField.getText()); // Set the minimum MPG filter
 
 
-        JobConf job = new JobConf(conf, App.class);
+		JobConf job = new JobConf(conf, App.class);
 
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(DoubleWritable.class);
-        job.setMapperClass(CarsMapper.class);
-        job.setReducerClass(CarsReducer.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(DoubleWritable.class);
+		job.setMapperClass(CarsMapper.class);
+		job.setReducerClass(CarsReducer.class);
 
-        Path input = new Path("hdfs://127.0.0.1:9000/input/cars.csv");
-        Path output = new Path("hdfs://127.0.0.1:9000/cars");
+		Path input = new Path("hdfs://127.0.0.1:9000/input/cars.csv");
+		Path output = new Path("hdfs://127.0.0.1:9000/cars");
 
-        FileInputFormat.setInputPaths(job, input);
-        FileOutputFormat.setOutputPath(job, output);
+		FileInputFormat.setInputPaths(job, input);
+		FileOutputFormat.setOutputPath(job, output);
 
-        try {
-            FileSystem fs = FileSystem.get(URI.create("hdfs://127.0.0.1:9000"), conf);
+		try {
+			FileSystem fs = FileSystem.get(URI.create("hdfs://127.0.0.1:9000"), conf);
 
-            if (fs.exists(output))
-                fs.delete(output, true);
+			if (fs.exists(output))
+				fs.delete(output, true);
 
-            RunningJob task = JobClient.runJob(job);
+			RunningJob task = JobClient.runJob(job);
 
-            System.out.println("Is successfull: " + task.isSuccessful());
+			System.out.println("Is successfull: " + task.isSuccessful());
 
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-    }
+	}
 }
 
 class JTextFieldWithPlaceholder extends JTextField {
